@@ -12,13 +12,17 @@
 
 typedef struct s_data
 {
-	mlx_t		*mlx;
-	mlx_image_t	*image;
-	int			height;
-	int			width;
-	int			**map;
-	int			error;
+	mlx_t			*mlx;
+	mlx_image_t		*image;
+	int				height;
+	int				width;
+	int				**map;
+	int				error;
+	int				scale;
+	int				shiftx;
+	int				shifty;
 }	t_data;
+
 
 char	*get_next_line(int fd);
 char	*ft_substr(char *s, unsigned int start, size_t len);

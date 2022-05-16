@@ -76,11 +76,14 @@ void	linelen(t_data	*data, char	*line)
 	int	i;
 
 	i = 0;
-	while(line[i] != '\0')
+	if (line)
 	{
-		if ((line[i] >= '0') && (line[i] <= '9'))
-			data->width++;
-		i++;
+		while(line[i] != '\0')
+		{
+			if ((line[i] >= '0') && (line[i] <= '9'))
+				data->width++;
+			i++;
+		}
 	}
 }
 
@@ -91,17 +94,17 @@ void	read_map(t_data	*data)
 	char	*line;
 
 	i = 0;
-	fd = open("map", O_RDONLY);
+	fd = open("assets/map", O_RDONLY);
 	line = get_next_line(fd);
 	linelen(data, line);
-	while (line)
+	while (line != NULL)
 	{
+		// if (check_map(line, data) == 1)
+		// {
+		// 	perror("Invalid map");
+		// 	exit(128);
+		// }
 		printf("%s", line);
-		if (check_map(line, data) == 1)
-		{
-			perror("Invalid map");
-			exit(128);
-		}
 		data->height++;
 		free(line);
 		line = get_next_line(fd);
@@ -140,7 +143,24 @@ void	draw(t_data	*data)
 	mlx_image_to_window(data->mlx, data->image, 0, 0);
 }
 
-void bresen(t_data	*data, int	x0, int	y0, int	x1, int	y1)
+void	hooking(mlx_key_data_t keydata, void* param)
+{
+	t_data *data;
+
+	data = param;
+
+if (keydata.key == MLX_KEY_J && keydata.action == MLX_PRESS)
+		puts("Hello ");
+
+	if (keydata.key == MLX_KEY_K && keydata.action == MLX_RELEASE)
+		puts("World");
+
+	if (keydata.key == MLX_KEY_L && keydata.action == MLX_REPEAT)
+		puts("!");
+	
+}
+
+void	bresen(t_data	*data, int	x0, int	y0, int	x1, int	y1)
 {
 	int	dx;
 	int	dy;
@@ -148,27 +168,35 @@ void bresen(t_data	*data, int	x0, int	y0, int	x1, int	y1)
 	int	x;
 	int	y;
 
+	x0 *= data->scale;
+	y0 *= data->scale;
+	x1 *= data->scale;
+	y1 *= data->scale;
+	x0 += data->shiftx;
+	y0 += data->shifty;
 	dx = x1 - x0;
 	dy = y1 - y0;
 	x = x0;
 	y = y0;
-	error = (2 * dy) - dx;
+	error = 2 * (dy - dx);
 
-	while (x < x1)
+	printf("X = [%d] Y = [%d] X1 = [%d] Y1 = [%d] Delta X = [%d] Delta Y = [%d] error = [%d]\n",x, y, x1, y1, dx, dy, error);
+	while (x <= x1 && y <= y1)
 	{
 		if (error >= 0)
 		{
 			mlx_put_pixel(data->image, x, y, 0xFF0000FF);
-			y = y + 1;
+			y++;
 			error = error + 2 * dy - 2 * dx;
 		}
 		else
 		{
 			mlx_put_pixel(data->image, x, y, 0xFF0000FF);
-			error = error + (2 * dy) - (2 * dx);
+			error = error + (2 * dy);
+			x++;
 		}
-		x++;
 	}
+	// mlx_image_to_window(data->mlx, data->image, 0, 0);
 }
 
 int	main(int argc, char	**argv)
@@ -178,28 +206,33 @@ int	main(int argc, char	**argv)
 	int		x;
 	int		y;
 	t_data	*data;
+	mlx_key_data_t keydata;
 
 	setbuf(stdout, NULL);
 	data = malloc(sizeof(t_data));
 	data->width = 0;
 	data->height = 0;
+	data->scale = 30;
 	read_map(data);
 	printf ("height = [%d],width = [%d]\n", data->height, data->width);
 	data->mlx = mlx_init(1920, 1080, "FDF", true);
 	data->image = mlx_new_image(data->mlx, 1920, 1080);
-	mlx_image_to_window(data->mlx, data->image, 1920, 1080);
-	draw (data);
-	// y = 0;
-	// while (y < data->height)
-	// {
-	// 	x = 0;
-	// 	while (x < data->width)
-	// 	{
-	// 		bresen(data, x, y, data->height, data->width);
-	// 		x++;
-	// 	}
-	// 	y++;
-	// }
+	// draw (data);
+	y = 0;
+	while (y < data->height)
+	{
+		x = 0;
+		while (x < data->width)
+		{
+			if (y + 1 < data->height)
+				bresen(data, x, y, x, y + 1);
+			if (x + 1 < data->width)
+				bresen(data, x, y, x + 1, y);
+			x++;
+		}
+		y++;
+	}
+	mlx_image_to_window(data->mlx, data->image, 0, 0);
 	mlx_loop(data->mlx);
 
 	return (0);

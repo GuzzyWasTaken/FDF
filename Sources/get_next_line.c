@@ -6,7 +6,7 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/01/31 16:10:21 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/04/14 17:24:13 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/05/12 10:53:50 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,10 @@
 char	*ft_read(int fd, char *stat_str)
 {
 	int		read_ret;
-	char	read_str[BUFFER_SIZE + 1];
+	char	*read_str;
 
 	read_ret = 1;
+	read_str = ft_calloc((BUFFER_SIZE + 1), sizeof(char));
 	while (ft_strchr(stat_str, '\n') == 0 && read_ret != 0)
 	{
 		read_ret = read(fd, read_str, BUFFER_SIZE);
@@ -65,7 +66,7 @@ char	*get_next_line(int fd)
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) == -1)
 		return (NULL);
 	if (!temp_str)
-		temp_str = malloc (1);
+		temp_str = ft_calloc(1, sizeof(char));
 	if (!temp_str)
 		return (NULL);
 	temp_str = ft_read(fd, temp_str);
