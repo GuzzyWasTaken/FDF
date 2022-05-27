@@ -24,7 +24,7 @@ typedef struct s_data
 }	t_data;
 
 
-char	*get_next_line(int fd);
+char	*get_next_line(int fd);                                                                                                                                                                                                                                                                                                                                       
 char	*ft_substr(char *s, unsigned int start, size_t len);
 char	*ft_calloc(size_t count, size_t size);
 char	*ft_strjoin(char *s1, char const *s2);
