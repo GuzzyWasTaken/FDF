@@ -2,26 +2,26 @@
 #include "../includes/fdf.h"
 
 
-void insert(char **array, t_data *data, int	height)
+void insert(char *line, t_data *data, int	height)
 {
-
+	char	**array;
 	int	i;
 	int x;
 
 	x = 0;
 	i = 0;
+
+	printf("line: %s\n", line);
 	printf("made it\n");
-	while (x > NULL)
+	x++;
+	array = ft_split(line, ' ');
+	while(array[i])
 	{
-		printf("array: %s\n", array[x]);
-		x++;
+		data->map[height][i] = ft_atoi(array[i]);
+		printf("line in insert: %d\n", data->map[height][i]);
+		i++;
 	}
-	// while(i < data->width)
-	// {
-	// 	printf("line : %c", array[i]);
-	// 	data->map[height][i] = ft_atoi(array[i]);
-	// 	i++;
-	// }
+	free (array);
 } 
 
 void	second_parse(t_data	*data)
@@ -29,7 +29,7 @@ void	second_parse(t_data	*data)
 	int		height;
 	int		width;
 	char	*line;
-	char	*array;
+	// char	**array;
 	int		i;
 	int		x;
 	int		fd;
@@ -37,6 +37,7 @@ void	second_parse(t_data	*data)
 	i = 0;
 	height = 0;
 	width = 0;
+	x = 0;
 	data->map = malloc(data->height * sizeof(int *));
 	while(height < data->height)
 	{
@@ -46,16 +47,19 @@ void	second_parse(t_data	*data)
 	}
 	fd = open("assets/map", O_RDONLY);
 	line = get_next_line(fd);
+	// array = ft_split(line, ' ');
 	insert(line, data, i);
+	printf("line: %s\n", line);
 	i++;
-	while (line || i < data->height)
+	printf("test\n");
+	while (i < data->height)
 	{
+		// free(array);
+		printf("safety check\n");
 		line = get_next_line(fd);
-		array = ft_split(line, ' ');
-		printf("height = %d\n", data->height);
-		insert(array, data, i);
+		insert(line, data, i);
+		// printf("array: %s\n", array[x]);
 		free(line);
-		free(array);
 		i++;
 	}
 }
@@ -239,7 +243,7 @@ int	main(int argc, char	**argv)
 	data->shifty = 0;
 	read_map(data);
 //	printf ("height = [%d],width = [%d]\n", data->height, data->width);
-	printf ("%d", data->map[3][9]);
+	// printf ("%d", data->map[3][9]);
 	data->mlx = mlx_init(1920, 1080, "FDF", true);
 	data->image = mlx_new_image(data->mlx, 1920, 1080);
 	mlx_image_to_window(data->mlx, data->image, 0, 0);
