@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "../includes/fdf.h"
+#include <math.h>
 
 
 void insert(char *line, t_data *data, int	height)
@@ -22,7 +23,14 @@ void insert(char *line, t_data *data, int	height)
 		i++;
 	}
 	free (array);
-} 
+}
+
+void	isometric(int *x, int *y, int z)
+{
+    //depricated. replaced by rotateX, -Y, -Z.
+	*x = (*x - *y) * cos(0.8);
+	*y = (*x + *y) * sin(0.7) - z;
+}
 
 void	second_parse(t_data	*data)
 {
@@ -135,6 +143,8 @@ void	bresen(t_data	*data, int	x0, int	y0, int	x1, int	y1)
 	int	error;
 	int	x;
 	int	y;
+	int	z;
+	int	z1;
 
 	x0 += data->shiftx;
 	y0 += data->shifty;
@@ -149,8 +159,11 @@ void	bresen(t_data	*data, int	x0, int	y0, int	x1, int	y1)
 	x = x0;
 	y = y0;
 	error = 2 * (dy - dx);
-
-//	printf("X = [%d] Y = [%d] X1 = [%d] Y1 = [%d] Delta X = [%d] Delta Y = [%d] error = [%d]\n",x, y, x1, y1, dx, dy, error);
+	z = data->map[y][x];
+	z1 = data->map[y1][x1];
+	isometric(&x, &y, z);
+	isometric(&x1, &y1, z1);
+	printf("X = [%d] Y = [%d] X1 = [%d] Y1 = [%d] Delta X = [%d] Delta Y = [%d] error = [%d]\n",x, y, x1, y1, dx, dy, error);
 	while (x <= x1 && y <= y1)
 	{
 
@@ -176,7 +189,7 @@ void	draw(t_data	*data)
 
 	y = 0;
 	ft_bzero(data->image->pixels, (data->mlx->height * data->mlx->width) * sizeof(unsigned int));
-
+	x = (x - y);
 	while (y < data->height)
 	{
 		x = 0;
