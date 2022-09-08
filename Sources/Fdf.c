@@ -12,24 +12,23 @@ void insert(char *line, t_data *data, int	height)
 	x = 0;
 	i = 0;
 
-	printf("line: %s\n", line);
-	printf("made it\n");
+	// printf("line: %s\n", line);
+	// printf("made it\n");
 	x++;
 	array = ft_split(line, ' ');
 	while(array[i])
 	{
 		data->map[height][i] = ft_atoi(array[i]);
-		printf("line in insert: %d\n", data->map[height][i]);
+		// printf("%d ", data->map[height][i]);
 		i++;
 	}
 	free (array);
 }
 
-void	isometric(int *x, int *y, int z)
+void	isometric(float *x, float *y, int z)
 {
-    //depricated. replaced by rotateX, -Y, -Z.
 	*x = (*x - *y) * cos(0.8);
-	*y = (*x + *y) * sin(0.7) - z;
+	*y = (*x + *y) * sin(0.8) - z;
 }
 
 void	second_parse(t_data	*data)
@@ -53,17 +52,17 @@ void	second_parse(t_data	*data)
 		// printf ("map00 = %d\n", data->map[0][0]);
 		height++;
 	}
-	fd = open("assets/map", O_RDONLY);
+	fd = open("assets/map2", O_RDONLY);
 	line = get_next_line(fd);
 	// array = ft_split(line, ' ');
 	insert(line, data, i);
-	printf("line: %s\n", line);
+	// printf("line: %s\n", line);
 	i++;
-	printf("test\n");
+	// printf("test\n");
 	while (i < data->height)
 	{
 		// free(array);
-		printf("safety check\n");
+		// printf("safety check\n");
 		line = get_next_line(fd);
 		insert(line, data, i);
 		// printf("array: %s\n", array[x]);
@@ -115,7 +114,7 @@ void	read_map(t_data	*data)
 	char	*line;
 
 	i = 0;
-	fd = open("assets/map", O_RDONLY);
+	fd = open("assets/map2", O_RDONLY);
 	line = get_next_line(fd);
 	linelen(data, line);
 	while (line != NULL)
@@ -136,51 +135,53 @@ void	read_map(t_data	*data)
 	second_parse(data);
 }
 
-void	bresen(t_data	*data, int	x0, int	y0, int	x1, int	y1)
+float maximum(float	y, float	x)
 {
-	int	dx;
-	int	dy;
-	int	error;
-	int	x;
-	int	y;
-	int	z;
-	int	z1;
+	if (y > x)
+		return(y);
+	return (x);
+}
 
-	x0 += data->shiftx;
-	y0 += data->shifty;
+void bresen(t_data	*data, float x, float y, float x1, float y1)
+{
+
+	float	x_step;
+	float	y_step;
+	float	max;
+	int		z;
+	int		z1;
+
+
+	printf("[%f]%f\n", x, y);
+	z = data->map[(int)y][(int)x];
+	z1 = data->map[(int)y1][(int)x1];
+
+	x += data->shiftx;
+	y += data->shifty;
 	x1 += data->shiftx;
 	y1 += data->shifty;
-	x0 *= data->scale;
-	y0 *= data->scale;
+	x *= data->scale;
+	y *= data->scale;
 	x1 *= data->scale;
 	y1 *= data->scale;
-	dx = x1 - x0;
-	dy = y1 - y0;
-	x = x0;
-	y = y0;
-	error = 2 * (dy - dx);
-	z = data->map[y][x];
-	z1 = data->map[y1][x1];
+
 	isometric(&x, &y, z);
 	isometric(&x1, &y1, z1);
-	printf("X = [%d] Y = [%d] X1 = [%d] Y1 = [%d] Delta X = [%d] Delta Y = [%d] error = [%d]\n",x, y, x1, y1, dx, dy, error);
-	while (x <= x1 && y <= y1)
-	{
 
-		if (error >= 0)
-		{
-			mlx_put_pixel(data->image, x, y, 0xFF0000FF);
-			y++;
-			error = error + 2 * dy - 2 * dx;
-		}
-		else
-		{
-			mlx_put_pixel(data->image, x, y, 0xFF0000FF);
-			error = error + (2 * dy);
-			x++;
-		}
+	x_step = x1 - x;
+	y_step = y1 - y;
+	max = maximum(fabs(y_step), fabs(x_step));
+	x_step /= max;
+	y_step /= max;
+	while ((int)(x - x1) || (int)(y - y1))
+	{
+		if ((y < data->image->height && y > 0) && (x < data->image->width && x > 0))
+			mlx_put_pixel(data->image, (int)x, (int)y, 0xfffffffff);
+		x += x_step;
+		y += y_step;
 	}
 }
+
 
 void	draw(t_data	*data)
 {
@@ -211,7 +212,7 @@ void	hooking(mlx_key_data_t keydata, void* param)
 	t_data *data;
 
 	data = param;
-	
+
 	if (keydata.action == MLX_RELEASE)
 		return ;
 	if (keydata.key == MLX_KEY_D)
@@ -235,6 +236,12 @@ void	hooking(mlx_key_data_t keydata, void* param)
 		data->shiftx = data->shiftx - 1;
 		draw(data);
 	}
+	if (keydata.key == MLX_KEY_E)
+	{
+		data->isometric *= -1;
+		printf("iso = %i\n", data->isometric);
+	}
+
 	//printf("x = [%d], y = [%d]\n", data->shiftx, data->shifty);
 }
 
@@ -254,7 +261,20 @@ int	main(int argc, char	**argv)
 	data->scale = 30;
 	data->shiftx = 0;
 	data->shifty = 0;
+	data->isometric = -1;
 	read_map(data);
+	// printf("\nwidth: %i height: %i\n", data->width, data->height);
+	// while (y < data->height)
+	// {
+	// 	while (x < data->width)
+	// 	{
+	// 		printf("[%i][%i] = %d ", y, x, data->map[y][x]);
+	// 		x++;
+	// 	}
+	// 	x = 0;
+	// 	write(1, "\n", 1);
+	// 	y++;
+	// }
 //	printf ("height = [%d],width = [%d]\n", data->height, data->width);
 	// printf ("%d", data->map[3][9]);
 	data->mlx = mlx_init(1920, 1080, "FDF", true);
