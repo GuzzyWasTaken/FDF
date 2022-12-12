@@ -2,42 +2,49 @@
 
 NAME	= fdf
 CFLAGS	= -w -Wunreachable-code -Wall -Werror -Wextra -g
-LDFLAGS = -fsanitize=thread -g
+LDFLAGS = -g
 LIBMLX	= MLX_42
 LIBFT	= libft
 USER	= auzochuk
 
 HEADERS	= -I ./include -I $(LIBMLX)/include -I $(LIBFT)
-LIBS	= -lglfw -L /Users/$(USER)/.brew/opt/glfw/lib/ $(LIBMLX)/libmlx42.a $(LIBFT)/libft.a
+LIBS	= -lglfw -L /Users/$(USER)/.brew/opt/glfw/lib/ $(LIBMLX)/libmlx42.a ./$(LIBFT)/libft.a
 SRCS	= $(shell find ./Sources -iname "*.c")
 OBJS	= ${SRCS:.c=.o}
 
-BOLD	= \033[1m
-BLACK	= \033[30;1m
-RED	= \033[31;1m
-GREEN	= \033[32;1m
-YELLOW	= \033[33;1m
-BLUE	= \033[34;1m
-MAGENTA	= \033[35;1m
-CYAN	= \033[36;1m
-WHITE	= \033[37;1m
-RESET	= \033[0m
+BOLD	:= \033[1m
+BLACK	:= \033[30;1m
+RED		:= \033[31;1m
+GREEN	:= \33[32;1m
+YELLOW	:= \33[33;1m
+BLUE	:= \33[34;1m
+MAGENTA	:= \33[35;1m
+CYAN	:= \33[36;1m
+WHITE	:= \33[37;1m
+RESET	:= \33[0m
 
 # //= Recipes =//
 
-all: libft libmlx $(NAME)
+all: lib libmlx $(NAME)
 
-libft:
+$(LIBMLX):
+	git clone https://github.com/codam-coding-college/MLX42.git $(LIBMLX)
+
+$(LIBFT):
+	git clone https://github.com/GuzzyWasTaken/libft.git $(LIBFT)
+
+lib: $(LIBFT)
 	@$(MAKE) -C $(LIBFT)
 
-libmlx:
+libmlx: $(LIBMLX)
 	@$(MAKE) -C $(LIBMLX)
 
+
 %.o: %.c
-	@$(CC) $(CFLAGS) -o $@ -c $< $(HEADERS) && printf "$(GREEN)$(BOLD)\rCompiling: $(notdir $<)\r\e[35C[OK]\n$(RESET)"
+	@$(CC) $(CFLAGS) -o $@ -c $< && printf "$(GREEN)$(BOLD)\rCompiling: $(notdir $<)\r\e[35C[OK]\n$(RESET)"
 
 $(NAME): $(OBJS)
-	@$(CC) $(LDFLAGS) $(OBJS) $(LIBS) $(HEADERS) -o $(NAME)
+	$(CC) $(LDFLAGS) $(LIBS) $(OBJS) -o $(NAME)
 
 clean:
 	@rm -f $(OBJS)
@@ -51,4 +58,4 @@ fclean: clean
 
 re: clean all
 
-.PHONY: all, clean, fclean, re, libmlx, libft
+.PHONY: all, clean, fclean, re, libmlx, lib

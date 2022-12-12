@@ -6,13 +6,13 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/01/31 16:11:04 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/04/14 17:24:46 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/12 16:35:47 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
 
-int	ft_strchr(const char *src, int c)
+int	gn_strchr(const char *src, int c)
 {
 	int		i;
 
@@ -28,7 +28,7 @@ int	ft_strchr(const char *src, int c)
 	return (0);
 }
 
-size_t	ft_strlen(const char *s)
+size_t	gn_strlen(const char *s)
 {
 	int	i;
 
@@ -40,7 +40,7 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
-char	*ft_strjoin(char *s1, char const *s2)
+char	*gn_strjoin(char *s1, char const *s2)
 {
 	char	*str;
 	int		i;
@@ -50,9 +50,9 @@ char	*ft_strjoin(char *s1, char const *s2)
 	if (*s1 == '\0' && *s2 == '\0')
 	{
 		free (s1);
-		return (ft_strdup(""));
+		return (gn_strdup(""));
 	}
-	str = ft_calloc((ft_strlen(s1) + (ft_strlen(s2) + 1)), sizeof(char));
+	str = gn_calloc((gn_strlen(s1) + (gn_strlen(s2) + 1)), sizeof(char));
 	if (!str)
 		return (NULL);
 	i = -1;
@@ -67,13 +67,13 @@ char	*ft_strjoin(char *s1, char const *s2)
 	return (str);
 }
 
-char	*ft_strdup(char *s)
+char	*gn_strdup(char *s)
 {
 	char	*p;
 	int		i;
 
 	i = 0;
-	p = ft_calloc((ft_strlen(s) + 1), sizeof(char));
+	p = gn_calloc((gn_strlen(s) + 1), sizeof(char));
 	if (!p)
 		return (NULL);
 	while (s[i] != 0)
@@ -84,7 +84,7 @@ char	*ft_strdup(char *s)
 	return (p);
 }
 
-char	*ft_substr(char *s, unsigned int start, size_t len)
+char	*gn_substr(char *s, unsigned int start, size_t len)
 {
 	char				*p;
 	unsigned int		i;
@@ -93,12 +93,12 @@ char	*ft_substr(char *s, unsigned int start, size_t len)
 	count = 0;
 	if (!s)
 		return (NULL);
-	i = ft_strlen(s);
+	i = gn_strlen(s);
 	if (start >= i)
-		return (ft_strdup("\0"));
+		return (gn_strdup("\0"));
 	if (len > i || start > i)
 		len = i;
-	p = ft_calloc((len + 1), sizeof(char));
+	p = gn_calloc((len + 1), sizeof(char));
 	if (!p)
 		return (NULL);
 	while (len > 0)
