@@ -6,11 +6,13 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/09 19:48:08 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/12 16:58:55 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/13 17:27:45 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
+
+//FIX THIS 
 
 void	linelen(t_data	*data, char	*line)
 {
@@ -19,9 +21,8 @@ void	linelen(t_data	*data, char	*line)
 	i = 0;
 	while (line[i])
 	{
-		printf("hello\n");
-		if (((line[i] >= '0') && (line[i] <= '9')) || line[i] == '-' || line[i] == '+')
-			while (line[i] != ' ')
+		if (ft_isdigit(line[i]) == 0 || line[i] == '-' || line[i] == '+')
+			while (line[i] != ' ' || line[i] != '\n' || line[i] != '\0')
 				i++;
 		data->width++;
 		i++;
@@ -76,24 +77,22 @@ void	second_parse(t_data *data)
 	}
 }
 
-int	check_map(char	*line, t_data *data)
+void	check_map(char	*line, t_data *data)
 {
 	int	i;
 
 	i = 0;
 	while (line[i])
 	{
-		if (ft_isalnum(line[i]) == 1 || line[i] == ' ' || line[i] == '\n' \
-		|| line[i] == '-' || line[i] == '+')
+		if (!(ft_isdigit(line[i]) == 1 || line[i] == ' ' || line[i] == '\n'))
 		{
-			if (line[i] == ' ' && line[i + 1] == ' ')
-				return (1);
-			i++;
+			write(2, "Invalid map\n", 13);
+			exit(1);
 		}
 		else
-			return (1);
+			i++;
 	}
-	return (0);
+
 }
 
 void	read_map(t_data	*data)
@@ -105,14 +104,13 @@ void	read_map(t_data	*data)
 	i = 0;
 	fd = open(data->arg_map, O_RDONLY);
 	line = get_next_line(fd);
+	if (!line)
+		exit(0);
+	check_map(line, data);
 	linelen(data, line);
 	while (line != NULL)
 	{
-		if (check_map(line, data) == 1)
-		{
-			perror("Invalid map");
-			exit(1);
-		}
+		check_map(line, data);
 		data->height++;
 		free(line);
 		line = get_next_line(fd);

@@ -6,7 +6,7 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/09 19:46:35 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/12 13:00:01 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/13 16:49:24 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,12 +67,14 @@ mlx_resizefunc	resize(int width, int height,	void *param)
 
 int	init_mlx(t_data *data)
 {
+
 	data->mlx = mlx_init(1920, 1080, "FDF", true);
 	data->img = mlx_new_image(data->mlx, 1920, 1080);
 	mlx_image_to_window(data->mlx, data->img, 0, 0);
 	data->shiftx = (data->mlx->width / 2) - \
 	(data->width * data->scale / 2) + 120;
 	data->shifty = (data->mlx->height / 2) - (data->height * data->scale / 2);
+	printf("hi\n");
 	draw (data);
 	mlx_key_hook(data->mlx, &hooking, data);
 	mlx_resize_hook(data->mlx, &resize, data);
@@ -95,7 +97,8 @@ int	init_data(char **argv)
 	data->isometric = -1;
 	data->angle = 0.8;
 	read_map(data);
-	printf("h = %i, w = %i\n",data->height, data->width);
+	// printf("h = %i, w = %i\n",data->height, data->width);
+
 	init_mlx(data);
 	return (0);
 }
