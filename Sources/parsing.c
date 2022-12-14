@@ -6,25 +6,27 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/09 19:48:08 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/13 17:27:45 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/14 18:06:27 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
-
-//FIX THIS 
 
 void	linelen(t_data	*data, char	*line)
 {
 	int	i;
 
 	i = 0;
+	if (!line)
+		exit (0);
 	while (line[i])
 	{
-		if (ft_isdigit(line[i]) == 0 || line[i] == '-' || line[i] == '+')
-			while (line[i] != ' ' || line[i] != '\n' || line[i] != '\0')
+		if (ft_isdigit(line[i]) == 1)
+		{
+			data->width++;
+			while (line[i] && ft_isdigit(line[i]) == 1)
 				i++;
-		data->width++;
+		}
 		i++;
 	}
 }
@@ -41,9 +43,20 @@ void	insert(char *line, t_data *data, int height)
 		data->map[height][i] = ft_atoi(array[i]);
 		i++;
 	}
+	i = 0;
+	while (data->map[height][i])
+	{
+		if (data->map[height][i] > 10000)
+		{
+			write(2, "Invalid map\n", 13);
+			exit(1);
+		}
+		i++;
+	}
 	free (array);
 }
 
+//free and norm
 void	second_parse(t_data *data)
 {
 	int		height;
@@ -84,15 +97,15 @@ void	check_map(char	*line, t_data *data)
 	i = 0;
 	while (line[i])
 	{
-		if (!(ft_isdigit(line[i]) == 1 || line[i] == ' ' || line[i] == '\n'))
+		if (!(ft_isdigit(line[i]) == 1 || line[i] == ' ' || \
+			line[i] == '-' || line[i] == '+' || line[i] == '\n'))
 		{
 			write(2, "Invalid map\n", 13);
-			exit(1);
+			exit(0);
 		}
 		else
 			i++;
 	}
-
 }
 
 void	read_map(t_data	*data)
@@ -108,6 +121,7 @@ void	read_map(t_data	*data)
 		exit(0);
 	check_map(line, data);
 	linelen(data, line);
+	printf("map width = %i", data->width);
 	while (line != NULL)
 	{
 		check_map(line, data);
