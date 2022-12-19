@@ -2,14 +2,17 @@
 
 NAME	= fdf
 CFLAGS	= -w -Wunreachable-code -Wall -Werror -Wextra -g
-LDFLAGS = -g
+LDFLAGS = -fsanitize=address -g
 LIBMLX	= MLX_42
 LIBFT	= libft
 USER	= auzochuk
 
-HEADERS	= -I ./include -I $(LIBMLX)/include -I $(LIBFT)
+INCLUDES = includes/fdf.h  
+HEADERS	= -I ./includes -I $(LIBMLX)/include -I $(LIBFT)
 LIBS	= -lglfw -L /Users/$(USER)/.brew/opt/glfw/lib/ $(LIBMLX)/libmlx42.a ./$(LIBFT)/libft.a
-SRCS	= $(shell find ./Sources -iname "*.c")
+MANDA_SRC := draw.c fdf.c get_next_line_utils.c get_next_line.c init.c parsing.c utils.c 
+MANDA_DIR	:=	sources/
+SRC	:= $(addprefix $(MANDA_DIR), $(MANDA_SRC))
 OBJS	= ${SRCS:.c=.o}
 
 BOLD	:= \033[1m
@@ -25,7 +28,7 @@ RESET	:= \33[0m
 
 # //= Recipes =//
 
-all: lib libmlx $(NAME)
+all: lib libmlx $(NAME) 
 
 $(LIBMLX):
 	git clone https://github.com/codam-coding-college/MLX42.git $(LIBMLX)
@@ -40,11 +43,11 @@ libmlx: $(LIBMLX)
 	@$(MAKE) -C $(LIBMLX)
 
 
-%.o: %.c
-	@$(CC) $(CFLAGS) -o $@ -c $< && printf "$(GREEN)$(BOLD)\rCompiling: $(notdir $<)\r\e[35C[OK]\n$(RESET)"
+%.o: %.c $(INCLUDES)
+	$(CC) $(CFLAGS) -o $@ -c $< && printf "$(GREEN)$(BOLD)\rCompiling: $(notdir $<)\r\e[35C[OK]\n$(RESET)"
 
-$(NAME): $(OBJS)
-	$(CC) $(LDFLAGS) $(LIBS) $(OBJS) -o $(NAME)
+$(NAME): $(SRC) $(INCLUDES)
+	$(CC) $(LDFLAGS) $(LIBS) $(SRC) $(OBJS) -o $(NAME)
 
 clean:
 	@rm -f $(OBJS)
