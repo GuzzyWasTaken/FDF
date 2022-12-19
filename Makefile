@@ -2,7 +2,7 @@
 
 NAME	= fdf
 CFLAGS	= -w -Wunreachable-code -Wall -Werror -Wextra -g
-LDFLAGS = -fsanitize=address -g
+# LDFLAGS = -fsanitize=address -g
 LIBMLX	= MLX_42
 LIBFT	= libft
 USER	= auzochuk
@@ -13,7 +13,7 @@ LIBS	= -lglfw -L /Users/$(USER)/.brew/opt/glfw/lib/ $(LIBMLX)/libmlx42.a ./$(LIB
 MANDA_SRC := draw.c fdf.c get_next_line_utils.c get_next_line.c init.c parsing.c utils.c 
 MANDA_DIR	:=	sources/
 SRC	:= $(addprefix $(MANDA_DIR), $(MANDA_SRC))
-OBJS	= ${SRCS:.c=.o}
+OBJS	= ${SRC:.c=.o}
 
 BOLD	:= \033[1m
 BLACK	:= \033[30;1m
@@ -44,10 +44,10 @@ libmlx: $(LIBMLX)
 
 
 %.o: %.c $(INCLUDES)
-	$(CC) $(CFLAGS) -o $@ -c $< && printf "$(GREEN)$(BOLD)\rCompiling: $(notdir $<)\r\e[35C[OK]\n$(RESET)"
+	@$(CC) $(CFLAGS) -o $@ -c $< && printf "$(GREEN)$(BOLD)\rCompiling: $(notdir $<)\r\e[35C[OK]\n$(RESET)"
 
-$(NAME): $(SRC) $(INCLUDES)
-	$(CC) $(LDFLAGS) $(LIBS) $(SRC) $(OBJS) -o $(NAME)
+$(NAME): $(OBJS) $(INCLUDES)
+	$(CC) $(LDFLAGS) $(LIBS) $(OBJS) -o $(NAME)
 
 clean:
 	@rm -f $(OBJS)
@@ -55,9 +55,10 @@ clean:
 	@$(MAKE) -C $(LIBMLX) clean
 
 fclean: clean
-	@rm -f $(NAME)
+	rm -f $(NAME)
 	@$(MAKE) -C $(LIBFT) fclean
 	@$(MAKE) -C $(LIBMLX) fclean
+
 
 re: clean all
 

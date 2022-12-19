@@ -6,7 +6,7 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/05 08:47:29 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/19 14:00:57 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/19 18:58:12 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,5 +67,6 @@ void	fdf_free(char	**str);
 void	bresen(t_data *data, t_draw drw, float x1, float y1);
 void	isometric(float *x, float *y, int z, t_data *data);
 float	maximum(float y, float x);
+void	fdf_free_int(int	**str);
 
 #endif
