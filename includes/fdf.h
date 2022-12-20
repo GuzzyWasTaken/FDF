@@ -6,7 +6,7 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/05 08:47:29 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/19 18:58:12 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/20 16:04:39 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,13 +60,12 @@ int		gn_strchr(const char *src, int c);
 char	*gn_strdup(char *s);
 void	init_data(char **argv);
 void	map_height(int height, t_data *data);
-void	insert(char *line, t_data *data, int height);
+int		insert(char *line, t_data *data, int height);
 void	read_map(t_data	*data);
 void	draw(t_data	*data);
 void	fdf_free(char	**str);
 void	bresen(t_data *data, t_draw drw, float x1, float y1);
 void	isometric(float *x, float *y, int z, t_data *data);
 float	maximum(float y, float x);
-void	fdf_free_int(int	**str);
 
 #endif
