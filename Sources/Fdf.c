@@ -6,11 +6,12 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/01 09:01:09 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/14 16:42:00 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/21 08:54:44 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
+#include <stdlib.h>
 
 void	check_file(char	*av)
 {
@@ -37,4 +38,3 @@ int	main(int argc, char	**argv)
 	init_data(argv);
 	return (0);
 }
-

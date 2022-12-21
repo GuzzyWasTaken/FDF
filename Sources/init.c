@@ -6,7 +6,7 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/09 19:46:35 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/14 18:07:59 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/20 16:01:52 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,12 @@ void	hooking_help(mlx_key_data_t keydata, t_data	*data)
 		draw(data);
 	}
 	if (keydata.key == MLX_KEY_ESCAPE)
+	{
 		mlx_close_window(data->mlx);
+	}
 }
 
-void	hooking(mlx_key_data_t keydata, void* param)
+void	hooking(mlx_key_data_t keydata, void*param)
 {
 	t_data	*data;
 
@@ -53,7 +55,7 @@ void	hooking(mlx_key_data_t keydata, void* param)
 	hooking_help(keydata, data);
 }
 
-mlx_resizefunc	resize(int width, int height,	void *param)
+void	resize(int width, int height,	void *param)
 {
 	t_data	*data;
 
@@ -67,7 +69,6 @@ mlx_resizefunc	resize(int width, int height,	void *param)
 
 void	init_mlx(t_data *data)
 {
-
 	data->mlx = mlx_init(1920, 1080, "FDF", true);
 	data->img = mlx_new_image(data->mlx, 1920, 1080);
 	mlx_image_to_window(data->mlx, data->img, 0, 0);
@@ -75,11 +76,12 @@ void	init_mlx(t_data *data)
 	(data->width * data->scale / 2) + 120;
 	data->shifty = (data->mlx->height / 2) - (data->height * data->scale / 2);
 	draw (data);
-	mlx_key_hook(data->mlx, &hooking, data);
 	mlx_resize_hook(data->mlx, &resize, data);
+	mlx_key_hook(data->mlx, &hooking, data);
 	mlx_loop(data->mlx);
 	mlx_delete_image(data->mlx, data->img);
 	mlx_terminate(data->mlx);
+	exit(0);
 }
 
 void	init_data(char **argv)

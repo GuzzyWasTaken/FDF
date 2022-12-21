@@ -2,10 +2,9 @@
 
 NAME	= fdf
 CFLAGS	= -w -Wunreachable-code -Wall -Werror -Wextra -g
-# LDFLAGS = -fsanitize=address -g
+LDFLAGS = -fsanitize=address -g
 LIBMLX	= MLX_42
 LIBFT	= libft
-USER	= auzochuk
 
 INCLUDES = includes/fdf.h  
 HEADERS	= -I ./includes -I $(LIBMLX)/include -I $(LIBFT)
@@ -46,8 +45,8 @@ libmlx: $(LIBMLX)
 %.o: %.c $(INCLUDES)
 	@$(CC) $(CFLAGS) -o $@ -c $< && printf "$(GREEN)$(BOLD)\rCompiling: $(notdir $<)\r\e[35C[OK]\n$(RESET)"
 
-$(NAME): $(OBJS) $(INCLUDES)
-	$(CC) $(LDFLAGS) $(LIBS) $(OBJS) -o $(NAME)
+$(NAME): $(OBJS) $(INCLUDES) Makefile
+	@$(CC) $(LDFLAGS) $(LIBS) $(OBJS) -o $(NAME)
 
 clean:
 	@rm -f $(OBJS)

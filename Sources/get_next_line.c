@@ -6,7 +6,7 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/01/31 16:10:21 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/13 10:24:07 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/20 11:21:22 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ char	*gn_read(int fd, char *stat_str)
 		else
 			stat_str = gn_strjoin(stat_str, read_str);
 	}
+	free(read_str);
 	return (stat_str);
 }
 

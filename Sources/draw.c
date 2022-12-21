@@ -6,24 +6,11 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/09 19:46:29 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/12 10:44:26 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/20 16:00:43 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
-
-float	maximum(float y, float x)
-{
-	if (y > x)
-		return (y);
-	return (x);
-}
-
-void	isometric(float *x, float *y, int z, t_data *data)
-{
-	*x = (*x - *y) * cos(data->angle);
-	*y = (*x + *y) * sin(data->angle) - (z * 3);
-}
 
 void	bresen_util(t_data	*data, t_draw	*drw,	float	*x1, float *y1)
 {

@@ -6,7 +6,7 @@
 /*   By: auzochuk <auzochuk@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/09 19:48:08 by auzochuk      #+#    #+#                 */
-/*   Updated: 2022/12/14 18:06:27 by auzochuk      ########   odam.nl         */
+/*   Updated: 2022/12/20 15:30:26 by auzochuk      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,23 +15,27 @@
 void	linelen(t_data	*data, char	*line)
 {
 	int	i;
+	int	width;
 
 	i = 0;
+	width = 0;
 	if (!line)
 		exit (0);
 	while (line[i])
 	{
 		if (ft_isdigit(line[i]) == 1)
 		{
-			data->width++;
+			width++;
 			while (line[i] && ft_isdigit(line[i]) == 1)
 				i++;
 		}
 		i++;
 	}
+	if (width > data->width)
+		data->width = width;
 }
 
-void	insert(char *line, t_data *data, int height)
+int	insert(char *line, t_data *data, int height)
 {
 	char	**array;
 	int		i;
@@ -46,26 +50,24 @@ void	insert(char *line, t_data *data, int height)
 	i = 0;
 	while (data->map[height][i])
 	{
-		if (data->map[height][i] > 10000)
+		if (data->map[height][i] > 10000 || data->map[height][i] < -10000)
 		{
 			write(2, "Invalid map\n", 13);
-			exit(1);
+			fdf_free(array);
+			return (1);
 		}
 		i++;
 	}
-	free (array);
+	fdf_free (array);
+	return (0);
 }
 
-//free and norm
 void	second_parse(t_data *data)
 {
 	int		height;
 	int		width;
 	char	*line;
-	int		i;
-	int		fd;
 
-	i = 0;
 	height = -1;
 	width = 0;
 	data->map = ft_calloc(data->height, sizeof(int *));
@@ -75,19 +77,11 @@ void	second_parse(t_data *data)
 	{
 		data->map[height] = ft_calloc((data->width + 1), sizeof(int));
 		if (!data->map[height])
+		{
 			exit (0);
+		}
 	}
-	fd = open(data->arg_map, O_RDONLY);
-	line = get_next_line(fd);
-	insert(line, data, i);
-	i++;
-	while (i < data->height)
-	{
-		line = get_next_line(fd);
-		insert(line, data, i);
-		free(line);
-		i++;
-	}
+	map_height(height, data);
 }
 
 void	check_map(char	*line, t_data *data)
@@ -119,12 +113,10 @@ void	read_map(t_data	*data)
 	line = get_next_line(fd);
 	if (!line)
 		exit(0);
-	check_map(line, data);
-	linelen(data, line);
-	printf("map width = %i", data->width);
 	while (line != NULL)
 	{
 		check_map(line, data);
+		linelen(data, line);
 		data->height++;
 		free(line);
 		line = get_next_line(fd);
