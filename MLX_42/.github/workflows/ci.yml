@@ -2,22 +2,44 @@ name: Build
 
 on:
   workflow_dispatch:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
   schedule:
-    - cron:  '0 0 * * FRI'
+    - cron: '0 0 * * FRI'
 
 jobs:
 
-  build-unix:
+  unit-test:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    env:
+      DISPLAY: ":99"
 
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make libglfw3-dev libglfw3 xorg build-essential cmake xorg-dev libx11-dev libglu1-mesa-dev freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libgl1-mesa-glx libgl1-mesa-dev xvfb
+    
+    - name: Install GLFW
+      uses: RpxdYTX/install-glfw-deps@v2
+
+    - name: Setup x11
+      run: Xvfb $DISPLAY -screen 0 1280x1024x24 &
+
+    - name: Run tests
+      run: make -C test
+
+  build-unix:
+    timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
 
-    timeout-minutes: 10
     steps:
     - name: Clone repository
       uses: actions/checkout@v2
@@ -37,20 +59,18 @@ jobs:
         fi
 
     - name: Build
-      run: make NOWARNING=1
+      run: make
 
   build-win:
-
-    runs-on: windows-latest
     timeout-minutes: 20
+    runs-on: windows-latest
+
     steps:
     - name: Clone repository
       uses: actions/checkout@v2
 
-    - name: Install Cygwin, including gcc
-      uses: egor-tensin/setup-cygwin@v3
-      with:
-        packages: unzip gcc-g++
+    - name: Install MinGW
+      uses: egor-tensin/setup-mingw@v2
 
     - name: Download GLFW binaries
       uses: carlosperate/download-file-action@v1.1.1
@@ -66,5 +86,4 @@ jobs:
         mv 'lib\glfw*' 'lib\glfw'
 
     - name: Build
-      run: |
-        make HEADERS="-I lib/glfw/include" NOWARNING=1 CYGWIN=1
+      run: make HEADERS="-I lib/glfw/include" WIN_UNIX=1

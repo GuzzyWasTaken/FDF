@@ -2,7 +2,6 @@
 
 NAME	= fdf
 CFLAGS	= -w -Wunreachable-code -Wall -Werror -Wextra -g
-LDFLAGS = -fsanitize=address -g
 LIBMLX	= MLX_42
 LIBFT	= libft
 
@@ -13,27 +12,28 @@ MANDA_SRC := draw.c fdf.c get_next_line_utils.c get_next_line.c init.c parsing.c
 MANDA_DIR	:=	sources/
 SRC	:= $(addprefix $(MANDA_DIR), $(MANDA_SRC))
 OBJS	= ${SRC:.c=.o}
+LIB :=	libft/libft.a MLX_42/libmlx42.a
 
-BOLD	:= \033[1m
-BLACK	:= \033[30;1m
-RED		:= \033[31;1m
-GREEN	:= \33[32;1m
-YELLOW	:= \33[33;1m
-BLUE	:= \33[34;1m
-MAGENTA	:= \33[35;1m
-CYAN	:= \33[36;1m
-WHITE	:= \33[37;1m
-RESET	:= \33[0m
+BOLD	:= \1\33[1m\2
+BLACK	:= \1\33[30;1m\2
+RED		:= \1\33[31;1m\2
+GREEN	:= \1\33[32;1m\2
+YELLOW	:= \1\33[33;1m\2
+BLUE	:= \1\33[34;1m\2
+MAGENTA	:= \1\33[35;1m\2
+CYAN	:= \1\33[36;1m\2
+WHITE	:= \1\33[37;1m\2
+RESET	:= \1\33[0m\2\3
 
 # //= Recipes =//
 
 all: lib libmlx $(NAME) 
 
-$(LIBMLX):
-	git clone https://github.com/codam-coding-college/MLX42.git $(LIBMLX)
+# $(LIBMLX):
+# 	git clone https://github.com/codam-coding-college/MLX42.git $(LIBMLX)
 
-$(LIBFT):
-	git clone https://github.com/GuzzyWasTaken/libft.git $(LIBFT)
+# $(LIBFT): 
+# 	git clone https://github.com/GuzzyWasTaken/libft.git $(LIBFT)
 
 lib: $(LIBFT)
 	@$(MAKE) -C $(LIBFT)
@@ -43,22 +43,23 @@ libmlx: $(LIBMLX)
 
 
 %.o: %.c $(INCLUDES)
-	@$(CC) $(CFLAGS) -o $@ -c $< && printf "$(GREEN)$(BOLD)\rCompiling: $(notdir $<)\r\e[35C[OK]\n$(RESET)"
+	@$(CC) $(CFLAGS) -o $@ -c $< && printf "$(GREEN)\rCompiling: $(notdir $<)\r\33[33C[OK]\n$(RESET)"
 
 $(NAME): $(OBJS) $(INCLUDES) Makefile
-	@$(CC) $(LDFLAGS) $(LIBS) $(OBJS) -o $(NAME)
+	@$(CC) $(CFLAGS) $(LIB) $(LIBS) $(OBJS) -o $(NAME)
 
 clean:
 	@rm -f $(OBJS)
-	@$(MAKE) -C $(LIBFT) clean
-	@$(MAKE) -C $(LIBMLX) clean
+	@$(MAKE) clean -C  $(LIBFT) 
+	@$(MAKE) clean -C $(LIBMLX)
 
-fclean: clean
-	rm -f $(NAME)
-	@$(MAKE) -C $(LIBFT) fclean
-	@$(MAKE) -C $(LIBMLX) fclean
+fclean:
+	@rm -f $(OBJS)
+	@rm -f $(NAME)
+	@$(MAKE) fclean -C $(LIBFT)
+	@$(MAKE) fclean -C $(LIBMLX)
 
 
-re: clean all
+re: fclean all
 
 .PHONY: all, clean, fclean, re, libmlx, lib

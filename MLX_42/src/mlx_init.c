@@ -6,7 +6,7 @@
 /*   By: W2Wizard <w2.wizzard@gmail.com>              +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/12/28 00:24:30 by W2Wizard      #+#    #+#                 */
-/*   Updated: 2022/03/09 13:44:58 by lde-la-h      ########   odam.nl         */
+/*   Updated: 2022/08/10 13:00:53 by lde-la-h      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,6 @@ static bool mlx_create_buffers(mlx_t* mlx)
 	glUniform1i(glGetUniformLocation(mlxctx->shaderprogram, "Texture14"), 14);
 	glUniform1i(glGetUniformLocation(mlxctx->shaderprogram, "Texture15"), 15);
 
-	// NOTE: Call manually once to calculate View Projection Matrix
-	glfwSetWindowSizeCallback(mlx->window, &mlx_on_resize);
-	mlx_on_resize(mlx->window, mlx->width, mlx->height);
 	return (true);
 }
 
@@ -116,11 +113,10 @@ static bool mlx_init_render(mlx_t* mlx)
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		return (mlx_error(MLX_GLADFAIL));
 	
-	//TODO: Separate error codes for shaders
 	if (!(vshader = mlx_compile_shader(vert_shader, GL_VERTEX_SHADER)))
-		return (mlx_error(MLX_SHDRFAIL));
+		return (mlx_error(MLX_VERTFAIL));
 	if (!(fshader = mlx_compile_shader(frag_shader, GL_FRAGMENT_SHADER)))
-		return (mlx_error(MLX_SHDRFAIL));
+		return (mlx_error(MLX_FRAGFAIL));
 	if (!(mlxctx->shaderprogram = glCreateProgram()))
 		return (mlx_error(MLX_SHDRFAIL));
 	glAttachShader(mlxctx->shaderprogram, vshader);
@@ -147,17 +143,21 @@ static bool mlx_init_render(mlx_t* mlx)
 
 //= Public =//
 
-bool sort_queue;
-mlx_errno_t mlx_errno;
+// NOTE: https://www.glfw.org/docs/3.3/group__window.html
+
+// Default settings
+int32_t mlx_settings[MLX_SETTINGS_MAX] = {false, false, false, true, false};
+mlx_errno_t mlx_errno = MLX_SUCCESS;
+bool sort_queue = false;
 
 mlx_t* mlx_init(int32_t width, int32_t height, const char* title, bool resize)
 {
+	MLX_ASSERT(width > 0, "Window width must be positive");
+	MLX_ASSERT(height > 0, "Window height must be positive");
+	MLX_ASSERT(title, "Window title can't be null");
+
 	bool init;
 	mlx_t* mlx;
-	mlx_errno = 0;
-	sort_queue = false;
-	if (width <= 0 || height <= 0 || !title)
-		return ((void*)mlx_error(MLX_NULLARG));
 	if (!(init = glfwInit()))
 		return ((void*)mlx_error(MLX_GLFWFAIL));
 	if (!(mlx = calloc(1, sizeof(mlx_t))))
@@ -165,19 +165,31 @@ mlx_t* mlx_init(int32_t width, int32_t height, const char* title, bool resize)
 	if (!(mlx->context = calloc(1, sizeof(mlx_ctx_t))))
 		return (free(mlx), (void*)mlx_error(MLX_MEMFAIL));
 
+	mlx_ctx_t* const mlxctx = mlx->context;
 	mlx->width = width;
 	mlx->height = height;
-	glfwWindowHint(GLFW_DECORATED, GL_TRUE);
+	mlxctx->initialWidth = width;
+	mlxctx->initialHeight = height;
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_MAXIMIZED, mlx_settings[MLX_MAXIMIZED]);
+	glfwWindowHint(GLFW_DECORATED, mlx_settings[MLX_DECORATED]);
+	glfwWindowHint(GLFW_VISIBLE, !mlx_settings[MLX_HEADLESS]);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, resize);
-	if (!(mlx->window = glfwCreateWindow(width, height, title, NULL, NULL)))
+	if (!(mlx->window = glfwCreateWindow(width, height, title, mlx_settings[MLX_FULLSCREEN] ? glfwGetPrimaryMonitor() : NULL, NULL)))
 		return (mlx_terminate(mlx), (void*)mlx_error(MLX_WINFAIL));
 	if (!mlx_init_render(mlx) || !mlx_create_buffers(mlx))
 		return (mlx_terminate(mlx), NULL);
 	return (mlx);
+}
+
+void mlx_set_setting(mlx_settings_t setting, int32_t value)
+{
+	MLX_ASSERT(setting >= 0 && setting < MLX_SETTINGS_MAX, "Invalid settings value");
+	mlx_settings[setting] = value;
 }

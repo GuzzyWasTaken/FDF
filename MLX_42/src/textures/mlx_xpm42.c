@@ -6,7 +6,7 @@
 /*   By: W2Wizard <w2.wizzard@gmail.com>              +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/12/28 03:42:29 by W2Wizard      #+#    #+#                 */
-/*   Updated: 2022/03/03 14:39:57 by lde-la-h      ########   odam.nl         */
+/*   Updated: 2022/06/27 19:58:33 by lde-la-h      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,22 @@
  * straight forward to this format however.
  */
 
+//= Private =//
+
 /**
- * Parses the XPM coolor value entry e.g: ".X #00FF00FF"
+ * Parses HEX color channel e.g: "0F"
+ * 
+ * @param channel The 2 character string to parse.
+ * @return Int value of the channel.
+ */
+static uint8_t mlx_parse_hex_channel(char* channel) 
+{
+	char temp_chan[] = {channel[0], channel[1], '\0'};
+	return (strtol(temp_chan, NULL, 16));
+}
+
+/**
+ * Parses the XPM color value entry e.g: ".X #00FF00FF"
  * into the color table while also verifying the format.
  * 
  * @param xpm The XPM.
@@ -57,8 +71,14 @@ static bool mlx_insert_xpm_entry(xpm_t* xpm, char* line, uint32_t* ctable, size_
 	if (!isspace(line[xpm->cpp]) || line[xpm->cpp + 1] != '#' || !isalnum(line[xpm->cpp + 2]))
 		return (false);
 
+	uint32_t color = 0;
+	size_t start_offset = xpm->cpp + 2;
+	color |= mlx_parse_hex_channel(line + start_offset) << 24;
+	color |= mlx_parse_hex_channel(line + start_offset + 2) << 16;
+	color |= mlx_parse_hex_channel(line + start_offset + 4) << 8;
+	color |= mlx_parse_hex_channel(line + start_offset + 6);
+	
 	int32_t index = mlx_fnv_hash(line, xpm->cpp) % s;
-	uint32_t color = (uint32_t)strtol(line + xpm->cpp + 2, NULL, 16);
 	ctable[index] = xpm->mode == 'm' ? mlx_rgba_to_mono(color) : color;
 	return (true);
 }
@@ -66,8 +86,6 @@ static bool mlx_insert_xpm_entry(xpm_t* xpm, char* line, uint32_t* ctable, size_
 /**
  * Retrieves the pixel data line by line and then processes each pixel
  * by hashing the characters and looking it up from the color table.
- * 
- * TODO: Use ssize_t as specified by getline.
  * 
  * @param xpm The XPM.
  * @param file The filepath to the XPM42 file.
@@ -77,17 +95,16 @@ static bool mlx_insert_xpm_entry(xpm_t* xpm, char* line, uint32_t* ctable, size_
  */
 static bool mlx_read_data(xpm_t* xpm, FILE* file, uint32_t* ctable, size_t s)
 {
-	int64_t bread;
-	size_t buffsize;
+	size_t line_len;
 	char* line = NULL;
 
 	for (int64_t y_xpm = 0; y_xpm < xpm->texture.height; y_xpm++)
 	{
-		if ((bread = getline(&line, &buffsize, file)) == -1)
+		if (!mlx_getline(&line, &line_len, file))
 			return (free(line), false);
-		if (line[bread - 1] == '\n')
-			bread--;
-		if (bread != xpm->texture.width * xpm->cpp)
+		if (line[line_len - 1] == '\n')
+			line_len--;
+		if (line_len != xpm->texture.width * xpm->cpp)
 			return (free(line), false);
 
 		// NOTE: Copy pixel by pixel as we need to retrieve the hash table.
@@ -114,15 +131,15 @@ static bool mlx_read_data(xpm_t* xpm, FILE* file, uint32_t* ctable, size_t s)
  */
 static bool mlx_read_table(xpm_t* xpm, FILE* file)
 {
-	size_t buffsize;
 	char* line = NULL;
-	int64_t bread = 0;
+	size_t line_len;
 	uint32_t ctable[UINT16_MAX] = {0};
 
 	for (int32_t i = 0; i < xpm->color_count; i++)
 	{
-		if ((bread = getline(&line, &buffsize, file)) == -1 || \
-		!mlx_insert_xpm_entry(xpm, line, ctable, (sizeof(ctable) / BPP)))
+		if (!mlx_getline(&line, &line_len, file))
+			return (free(line), false);
+		if (!mlx_insert_xpm_entry(xpm, line, ctable, (sizeof(ctable) / BPP)))
 			return (free(line), false);
 	}
 	free(line);
@@ -166,6 +183,7 @@ xpm_t* mlx_load_xpm42(const char* path)
 	FILE* file;
 	xpm_t* xpm = NULL;
 
+	MLX_NONNULL(path);
 	if (!strstr(path, ".xpm42"))
 		return ((void*)mlx_error(MLX_INVEXT));
 	if (!(file = fopen(path, "r")))
@@ -184,11 +202,7 @@ xpm_t* mlx_load_xpm42(const char* path)
 
 void mlx_delete_xpm42(xpm_t* xpm)
 {
-	if (!xpm)
-	{
-		mlx_error(MLX_NULLARG);
-		return;
-	}
+	MLX_NONNULL(xpm);
 	free(xpm->texture.pixels);
 	free(xpm);
 }

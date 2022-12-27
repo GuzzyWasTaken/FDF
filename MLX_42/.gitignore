@@ -53,13 +53,10 @@ dkms.conf
 
 # Misc
 main.c
-*.xpm
-*.png
-*.xpm42
-*.png
+temp/
 .vscode/
 lib/glfw/
+.DS_Store
 
 # Special shader files
-mlx_vert.c
-mlx_frag.c
+mlx_*_shader.c

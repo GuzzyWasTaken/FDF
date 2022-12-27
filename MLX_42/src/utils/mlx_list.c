@@ -6,7 +6,7 @@
 /*   By: W2Wizard <w2.wizzard@gmail.com>              +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/12/28 01:53:51 by W2Wizard      #+#    #+#                 */
-/*   Updated: 2022/03/09 13:43:03 by lde-la-h      ########   odam.nl         */
+/*   Updated: 2022/11/26 14:26:23 by jvan-hal      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@ int32_t mlx_lstsize(mlx_list_t* lst)
 {
 	int32_t	i = 0;
 
-	if (!lst)
-		return (i);
 	while (lst)
 	{
 		i++;
@@ -28,15 +26,23 @@ int32_t mlx_lstsize(mlx_list_t* lst)
 	return (i);
 }
 
+static void mlx_lstdelone(mlx_list_t* lst, void (*del)(void *))
+{
+	if (del != NULL)
+		del(lst->content);
+	free(lst);
+}
+
 void mlx_lstclear(mlx_list_t** lst, void (*del)(void*))
 {
-	if (!*lst)
-		return;
-	if ((*lst)->next)
-		mlx_lstclear(&(*lst)->next, del);
-	del((*lst)->content);
-	free(*lst);
-	(*lst) = NULL;
+	mlx_list_t* next_lst;
+
+	while (*lst != NULL)
+	{
+		next_lst = (*lst)->next;
+		mlx_lstdelone(*lst, del);
+		*lst = next_lst;
+	}
 }
 
 mlx_list_t* mlx_lstnew(void* content)
@@ -54,12 +60,10 @@ mlx_list_t* mlx_lstnew(void* content)
 
 mlx_list_t* mlx_lstlast(mlx_list_t* lst)
 {
-	while (lst)
-	{
-		if (!lst->next)
-			break;
+	if (!lst)
+		return (NULL);
+	while (lst->next)
 		lst = lst->next;
-	}
 	return (lst);
 }
 
@@ -81,6 +85,8 @@ void mlx_lstadd_front(mlx_list_t** lst, mlx_list_t* new)
 {
 	if (!lst || !new)
 		return;
+	if ((*lst) != NULL)
+		(*lst)->prev = new;
 	new->next = *lst;
 	new->prev = NULL;
 	*lst = new;
@@ -104,9 +110,9 @@ bool mlx_equal_inst(void* lstcontent, void* value)
 }
 
 /**
- * Removes the specified content form the list, if found.
+ * Removes the specified content from the list, if found.
  * Also fixes any relinking that might be needed.
- *  
+ *
  * @param[in] lst The list
  * @param[in] comp Function to check if the content and value are the same.
  * @returns The removed element, clean up as you wish.
@@ -129,7 +135,7 @@ mlx_list_t* mlx_lstremove(mlx_list_t** lst, void* value, bool (*comp)(void*, voi
 }
 
 // Retrieve Z value from queue.
-static int32_t mlx_getdata(mlx_list_t* entry)
+static int32_t mlx_getzdata(mlx_list_t* entry)
 {
 	const draw_queue_t* queue = entry->content;
 
@@ -140,10 +146,10 @@ static int32_t mlx_getdata(mlx_list_t* entry)
 static void mlx_insertsort(mlx_list_t** head, mlx_list_t* new)
 {
 	mlx_list_t* current;
- 
+
 	if (*head == NULL)
 		*head = new;
-	else if (mlx_getdata(*head) >= mlx_getdata(new))
+	else if (mlx_getzdata(*head) >= mlx_getzdata(new))
 	{
 		new->next = *head;
 		new->next->prev = new;
@@ -154,13 +160,13 @@ static void mlx_insertsort(mlx_list_t** head, mlx_list_t* new)
 		current = *head;
 
 		// Find insertion location.
-		while (current->next != NULL && mlx_getdata(current->next) < mlx_getdata(new))
+		while (current->next != NULL && mlx_getzdata(current->next) < mlx_getzdata(new))
 			current = current->next;
 		new->next = current->next;
- 
+
 		// Insert at the end
 		if (current->next != NULL)
-			new->next->prev = new; 
+			new->next->prev = new;
 		current->next = new;
 		new->prev = current;
 	}
@@ -169,7 +175,7 @@ static void mlx_insertsort(mlx_list_t** head, mlx_list_t* new)
 /**
  * Okay-ish sorting algorithm to sort the render queue / doubly linked list.
  * We need to do this to fix transparency.
- * 
+ *
  * @param lst The render queue.
  */
 void mlx_sort_renderqueue(mlx_list_t** lst)
@@ -177,7 +183,7 @@ void mlx_sort_renderqueue(mlx_list_t** lst)
 	mlx_list_t* sorted = NULL;
 	mlx_list_t* lstcpy = *lst;
 
-	while (lstcpy != NULL) 
+	while (lstcpy != NULL)
 	{
 		mlx_list_t* next = lstcpy->next;
 

@@ -17,8 +17,8 @@
  * over in the glfw3.h file.
  */
 
-#ifndef MLX42_KEYS_H
-# define MLX42_KEYS_H
+#ifndef MLX42_INPUT_H
+# define MLX42_INPUT_H
 
 /**
  * A key action such as pressing or releasing a key.
@@ -81,6 +81,25 @@ typedef enum mouse_mode
 	MLX_MOUSE_HIDDEN	= 0x00034002,
 	MLX_MOUSE_DISABLED	= 0x00034003,
 }	mouse_mode_t;
+
+/**
+ * Various cursors that are standart.
+ * @param ARROW The regular arrow cursor.
+ * @param IBEAM The text input I-beam cursor shape.
+ * @param CROSSHAIR The crosshair shape cursor.
+ * @param HAND The hand shape cursos.
+ * @param HRESIZE The horizontal resize arrow shape.
+ * @param VRESIZE The vertical resize arrow shape.
+ */
+typedef enum cursor
+{
+	MLX_CURSOR_ARROW		= 0x00036001,
+	MLX_CURSOR_IBEAM		= 0x00036002,
+	MLX_CURSOR_CROSSHAIR	= 0x00036003,
+	MLX_CURSOR_HAND			= 0x00036004,
+	MLX_CURSOR_HRESIZE		= 0x00036005,
+	MLX_CURSOR_VRESIZE		= 0x00036006,
+}	cursor_t;
 
 /**
  * All sorts of keyboard keycodes.

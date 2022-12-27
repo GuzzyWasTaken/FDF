@@ -6,7 +6,7 @@
 #    By: W2Wizard <w2.wizzard@gmail.com>              +#+                      #
 #                                                    +#+                       #
 #    Created: 2022/02/26 21:32:00 by W2Wizard      #+#    #+#                  #
-#    Updated: 2022/02/26 21:32:00 by W2Wizard      ########   odam.nl          #
+#    Updated: 2022/07/05 14:55:05 by jobvan-d      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,38 +16,34 @@
 #//= Colors =//#
 # Nope :(
 
-CC		= gcc # We need to explicitly mention GCC/CC here.
-WINSTFU	= > NUL 2>&1 # In some cases we want windows to just stfu
-SHDR	= src\mlx_vert.c src\mlx_frag.c
-SHDRSRC	= shaders\default.frag shaders\default.vert
-SRCS	= $(shell dir /S/B "*.c") $(SHDR)
-OBJS	= $(SRCS:.c=.o)
+CC		:= gcc # We need to explicitly mention GCC/CC here.
+WINSTFU	:= > NUL 2>&1 # In some cases we want windows to just stfu
 
-#//= Recipes =//#
-all: $(SHDR) $(NAME)
+# Switch file paths to windows \ delimiter
+SHDR	:= $(subst /,\,$(SHDR))
+LIB		:= $(subst /,\,$(LIB))
+SRCS	:= $(subst /,\,$(SRCS))
+OBJS	:= $(subst /,\,$(OBJS))
+HDRS 	:= $(subst /,\,$(HDRS))
 
-# Convert our shaders to .c files
-src\mlx_vert.c: shaders\default.vert
-	@echo "Converting shader: $< -> $@"
-	@.\tools\compile_shader.bat $< > $@
-
-src\mlx_frag.c: shaders\default.frag
-	@echo "Converting shader: $< -> $@"
-	@.\tools\compile_shader.bat $< > $@
-
-%.o: %.c
-	@$(CC) $(CFLAGS) -c $< -o $@ $(HEADERS) && echo Compiling: $(notdir $<) [OK]
+#//= Make Rules =//#
 
 $(NAME): $(OBJS)
-	@ar rc $(NAME) $(OBJS)
+	@ar rc $@ $^
 	@echo Done
 
+%.o: %.c $(HDRS)
+	@echo Compiling: $(notdir $<)
+	@$(CC) $(CFLAGS) -o $@ -c $< $(HEADERS)
+
+# Convert shaders to .c files
+$(SRC_DIR)\mlx_%_shader.c: $(SHADER_DIR)\default.%
+	@echo Shader to C: $< -^> $@
+	@.\tools\compile_shader.bat $< > $@
+
 clean:
+	@echo Cleaning
 	@del /F /Q $(OBJS) $(SHDR) $(WINSTFU)
 
 fclean: clean
-	@del /Q $(NAME) $(WINSTFU)
-
-re: clean all
-
-.PHONY : all clean re fclean
+	@del /F /Q $(NAME) $(WINSTFU)
